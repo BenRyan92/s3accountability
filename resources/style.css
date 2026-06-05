@@ -597,3 +597,106 @@ input:disabled {
     color: var(--cav-gold);
     border-bottom-color: var(--cav-gold);
 }
+
+.matrix-note {
+    color: var(--text-muted);
+    margin-bottom: 0;
+}
+
+.matrix-wrapper {
+    max-height: 70vh;
+    overflow: auto;
+}
+
+.accountability-matrix {
+    min-width: 850px;
+}
+
+.accountability-matrix th,
+.accountability-matrix td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.accountability-matrix th small {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+}
+
+.sticky-staff-column {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    min-width: 260px;
+    text-align: left !important;
+    background: #111317;
+}
+
+td.sticky-staff-column {
+    background: var(--bg-panel);
+}
+
+.staff-name-button {
+    display: block;
+    padding: 0;
+    margin-bottom: 0.2rem;
+    color: var(--cav-gold);
+    background: none;
+    border: none;
+    font-weight: 800;
+    text-align: left;
+}
+
+.staff-name-button:hover {
+    text-decoration: underline;
+}
+
+.sticky-staff-column small {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.matrix-status-cell {
+    width: 90px;
+}
+
+.matrix-status-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    border-radius: 50%;
+    font-weight: 900;
+    font-size: 0.85rem;
+}
+
+.matrix-accounted {
+    background: var(--success);
+    color: #111;
+}
+
+.matrix-excused {
+    background: var(--warning);
+    color: #111;
+}
+
+.matrix-pending {
+    background: #777d87;
+    color: #111;
+}
+
+.matrix-unexcused {
+    background: var(--danger);
+    color: #fff;
+}
+
+.staff-detail-modal-content {
+    width: min(1000px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+}

@@ -1,8 +1,9 @@
 let hqStaff = [];
 let hqReports = [];
-let hqRows = [];
+let hqPeriods = [];
 
-const hqReportingPeriod = document.querySelector("#hqReportingPeriod");
+const hqMatrixHead = document.querySelector("#hqMatrixHead");
+const hqMatrixBody = document.querySelector("#hqMatrixBody");
 
 const totalStaffCount = document.querySelector("#totalStaffCount");
 const accountedCount = document.querySelector("#accountedCount");
@@ -10,13 +11,26 @@ const excusedCount = document.querySelector("#excusedCount");
 const pendingCount = document.querySelector("#pendingCount");
 const unexcusedCount = document.querySelector("#unexcusedCount");
 
-const statusFilter = document.querySelector("#statusFilter");
-const hqAccountabilityBody = document.querySelector("#hqAccountabilityBody");
+const staffDetailModal = document.querySelector("#staffDetailModal");
+const closeStaffDetailModalBtn = document.querySelector("#closeStaffDetailModalBtn");
+
+const modalStaffName = document.querySelector("#modalStaffName");
+const modalStaffRank = document.querySelector("#modalStaffRank");
+const modalStaffAoPosition = document.querySelector("#modalStaffAoPosition");
+const modalStaffJoinDate = document.querySelector("#modalStaffJoinDate");
+const modalStaffLastAfsm = document.querySelector("#modalStaffLastAfsm");
+
+const modalSixMonthOverview = document.querySelector("#modalSixMonthOverview");
+const modalReportHistoryBody = document.querySelector("#modalReportHistoryBody");
 
 document.addEventListener("DOMContentLoaded", initHqDashboard);
 
-statusFilter.addEventListener("change", function () {
-    renderHqTable(statusFilter.value);
+closeStaffDetailModalBtn.addEventListener("click", closeStaffDetailModal);
+
+staffDetailModal.addEventListener("click", function (event) {
+    if (event.target === staffDetailModal) {
+        closeStaffDetailModal();
+    }
 });
 
 async function initHqDashboard() {
@@ -27,105 +41,238 @@ async function initHqDashboard() {
         hqStaff = Array.isArray(staffData) ? staffData : [];
         hqReports = Array.isArray(reportData) ? reportData : [];
 
-        buildHqRows();
+        hqPeriods = getLastSixReportingPeriods();
+
         renderHqSummary();
-        renderHqTable("All");
+        renderHqMatrix();
     } catch (error) {
         console.error("Failed to load HQ dashboard:", error);
 
-        hqAccountabilityBody.innerHTML = `
+        hqMatrixBody.innerHTML = `
       <tr>
-        <td colspan="6">Failed to load accountability data.</td>
+        <td>Failed to load accountability data.</td>
       </tr>
     `;
     }
 }
 
-function buildHqRows() {
-    const reportingPeriod = getCurrentReportingPeriod();
+function renderHqSummary() {
+    const currentPeriod = getCurrentReportingPeriod();
 
-    hqReportingPeriod.textContent =
-        `${getMonthName(reportingPeriod.month)} ${reportingPeriod.year}`;
-
-    hqRows = hqStaff.map(function (staff) {
-        const report = hqReports.find(function (report) {
-            return (
-                report.Name === staff.Name &&
-                Number(report.ReportMonth) === reportingPeriod.month &&
-                Number(report.ReportYear) === reportingPeriod.year
-            );
-        });
-
-        const status = calculateStatus(
-            report,
-            reportingPeriod.month,
-            reportingPeriod.year
+    const currentRows = hqStaff.map(function (staff) {
+        const report = findReportForPeriod(
+            staff.Name,
+            currentPeriod.month,
+            currentPeriod.year
         );
 
-        return {
-            rank: staff.Rank || "-",
-            name: staff.Name || "-",
-            aoPosition: staff["AO Position"] || "-",
-            status: status,
-            submitted: report ? formatDate(report.Timestamp) : "-",
-            notes: report ? report.Notes || "-" : "-"
-        };
+        return calculateStatus(report, currentPeriod.month, currentPeriod.year);
     });
+
+    totalStaffCount.textContent = hqStaff.length;
+    accountedCount.textContent = countStatus(currentRows, "Accounted");
+    excusedCount.textContent = countStatus(currentRows, "Excused");
+    pendingCount.textContent = countStatus(currentRows, "Pending");
+    unexcusedCount.textContent = countStatus(currentRows, "Unexcused");
 }
 
-function renderHqSummary() {
-    totalStaffCount.textContent = hqRows.length;
-
-    accountedCount.textContent = countByStatus("Accounted");
-    excusedCount.textContent = countByStatus("Excused");
-    pendingCount.textContent = countByStatus("Pending");
-    unexcusedCount.textContent = countByStatus("Unexcused");
+function renderHqMatrix() {
+    renderMatrixHeader();
+    renderMatrixBody();
 }
 
-function renderHqTable(filterStatus) {
-    hqAccountabilityBody.innerHTML = "";
+function renderMatrixHeader() {
+    hqMatrixHead.innerHTML = "";
 
-    let rowsToRender = hqRows;
+    const headerRow = document.createElement("tr");
 
-    if (filterStatus !== "All") {
-        rowsToRender = hqRows.filter(function (row) {
-            return row.status === filterStatus;
-        });
-    }
+    headerRow.innerHTML = `
+    <th class="sticky-staff-column">Staff Member</th>
+  `;
 
-    if (rowsToRender.length === 0) {
-        hqAccountabilityBody.innerHTML = `
+    hqPeriods.forEach(function (period) {
+        const th = document.createElement("th");
+
+        th.innerHTML = `
+      <span>${getMonthName(period.month).slice(0, 3)}</span>
+      <small>${period.year}</small>
+    `;
+
+        headerRow.appendChild(th);
+    });
+
+    hqMatrixHead.appendChild(headerRow);
+}
+
+function renderMatrixBody() {
+    hqMatrixBody.innerHTML = "";
+
+    if (hqStaff.length === 0) {
+        hqMatrixBody.innerHTML = `
       <tr>
-        <td colspan="6">No staff members found for this filter.</td>
+        <td colspan="7">No staff members found.</td>
       </tr>
     `;
         return;
     }
 
-    rowsToRender.forEach(function (row) {
-        const tableRow = document.createElement("tr");
+    hqStaff.forEach(function (staff) {
+        const row = document.createElement("tr");
 
-        tableRow.innerHTML = `
-      <td>${row.rank}</td>
-      <td>${row.name}</td>
-      <td>${row.aoPosition}</td>
-      <td>
-        <span class="status-pill status-${row.status.toLowerCase()}">
-          ${row.status}
+        const staffCell = document.createElement("td");
+        staffCell.classList.add("sticky-staff-column");
+
+        const staffButton = document.createElement("button");
+        staffButton.type = "button";
+        staffButton.classList.add("staff-name-button");
+        staffButton.textContent = `${staff.Rank || ""} ${staff.Name}`;
+
+        staffButton.addEventListener("click", function () {
+            openStaffDetailModal(staff);
+        });
+
+        const positionSmall = document.createElement("small");
+        positionSmall.textContent = staff["AO Position"] || "-";
+
+        staffCell.appendChild(staffButton);
+        staffCell.appendChild(positionSmall);
+        row.appendChild(staffCell);
+
+        hqPeriods.forEach(function (period) {
+            const report = findReportForPeriod(staff.Name, period.month, period.year);
+            const status = calculateStatus(report, period.month, period.year);
+
+            const statusCell = document.createElement("td");
+            statusCell.classList.add("matrix-status-cell");
+
+            statusCell.innerHTML = `
+        <span class="matrix-status-dot matrix-${status.toLowerCase()}" title="${status}">
+          ${getStatusShortLabel(status)}
         </span>
-      </td>
-      <td>${row.submitted}</td>
-      <td>${row.notes}</td>
-    `;
+      `;
 
-        hqAccountabilityBody.appendChild(tableRow);
+            row.appendChild(statusCell);
+        });
+
+        hqMatrixBody.appendChild(row);
     });
 }
 
-function countByStatus(status) {
-    return hqRows.filter(function (row) {
-        return row.status === status;
+function openStaffDetailModal(staff) {
+    const staffReports = hqReports.filter(function (report) {
+        return report.Name === staff.Name;
+    });
+
+    modalStaffName.textContent = `${staff.Rank || ""} ${staff.Name}`;
+    modalStaffRank.textContent = staff.Rank || "-";
+    modalStaffAoPosition.textContent = staff["AO Position"] || "-";
+    modalStaffJoinDate.textContent = staff["Join Date"] || "-";
+    modalStaffLastAfsm.textContent = staff["Last AFSM"] || "-";
+
+    renderModalSixMonthOverview(staffReports);
+    renderModalReportHistory(staffReports);
+
+    staffDetailModal.classList.remove("hidden");
+}
+
+function closeStaffDetailModal() {
+    staffDetailModal.classList.add("hidden");
+}
+
+function renderModalSixMonthOverview(staffReports) {
+    modalSixMonthOverview.innerHTML = "";
+
+    const currentPeriod = getCurrentReportingPeriod();
+
+    hqPeriods.forEach(function (period) {
+        const report = staffReports.find(function (report) {
+            return (
+                Number(report.ReportMonth) === period.month &&
+                Number(report.ReportYear) === period.year
+            );
+        });
+
+        const status = calculateStatus(report, period.month, period.year);
+
+        const monthCard = document.createElement("div");
+        monthCard.classList.add("month-status-card");
+        monthCard.classList.add(`month-status-${status.toLowerCase()}`);
+
+        if (
+            period.month === currentPeriod.month &&
+            period.year === currentPeriod.year
+        ) {
+            monthCard.classList.add("current-reporting-month");
+        }
+
+        monthCard.innerHTML = `
+      <span>${getMonthName(period.month).slice(0, 3)}</span>
+      <strong>${status}</strong>
+      <small>${period.year}</small>
+    `;
+
+        modalSixMonthOverview.appendChild(monthCard);
+    });
+}
+
+function renderModalReportHistory(staffReports) {
+    modalReportHistoryBody.innerHTML = "";
+
+    if (staffReports.length === 0) {
+        modalReportHistoryBody.innerHTML = `
+      <tr>
+        <td colspan="5">No accountability reports submitted yet.</td>
+      </tr>
+    `;
+        return;
+    }
+
+    const sortedReports = [...staffReports].sort(function (a, b) {
+        if (Number(b.ReportYear) !== Number(a.ReportYear)) {
+            return Number(b.ReportYear) - Number(a.ReportYear);
+        }
+
+        return Number(b.ReportMonth) - Number(a.ReportMonth);
+    });
+
+    sortedReports.forEach(function (report) {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+      <td>${getMonthName(Number(report.ReportMonth))}</td>
+      <td>${report.ReportYear}</td>
+      <td>${report.Status}</td>
+      <td>${formatDate(report.Timestamp)}</td>
+      <td>${report.Notes || "-"}</td>
+    `;
+
+        modalReportHistoryBody.appendChild(row);
+    });
+}
+
+function findReportForPeriod(name, month, year) {
+    return hqReports.find(function (report) {
+        return (
+            report.Name === name &&
+            Number(report.ReportMonth) === month &&
+            Number(report.ReportYear) === year
+        );
+    });
+}
+
+function countStatus(statusArray, status) {
+    return statusArray.filter(function (item) {
+        return item === status;
     }).length;
+}
+
+function getStatusShortLabel(status) {
+    if (status === "Accounted") return "A";
+    if (status === "Excused") return "E";
+    if (status === "Pending") return "P";
+    if (status === "Unexcused") return "U";
+
+    return "-";
 }
 
 function calculateStatus(report, reportMonth, reportYear) {
@@ -158,6 +305,30 @@ function getCurrentReportingPeriod() {
         month: month,
         year: year
     };
+}
+
+function getLastSixReportingPeriods() {
+    const periods = [];
+    const currentPeriod = getCurrentReportingPeriod();
+
+    let month = currentPeriod.month;
+    let year = currentPeriod.year;
+
+    for (let i = 0; i < 6; i++) {
+        periods.push({
+            month: month,
+            year: year
+        });
+
+        month--;
+
+        if (month === 0) {
+            month = 12;
+            year--;
+        }
+    }
+
+    return periods.reverse();
 }
 
 function getReportingDeadline(reportMonth, reportYear) {

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>S3 Accountability Overview</title>
+    <title>S3 HQ Accountability Overview</title>
 
     <link rel="stylesheet" href="./resources/style.css" />
 </head>
@@ -12,50 +12,41 @@
 <body>
 <nav class="main-nav">
     <div class="nav-container">
-
         <div class="nav-brand">
             <img
                     src="https://wiki.7cav.us/images/0/04/S3Crest.png?20200702032251"
                     alt="S3 Crest"
                     class="nav-logo"
-            >
+            />
 
             <span>S3 Operations Tracker</span>
         </div>
 
         <ul class="nav-links">
             <li>
-                <a href="./index.html" class="nav-link">
-                    Home
-                </a>
+                <a href="./index.html" class="nav-link">Home</a>
             </li>
 
             <li>
-                <a href="./hq.html" class="nav-link  active">
-                    Staff Overview
-                </a>
+                <a href="./hq.html" class="nav-link active">Staff Overview</a>
             </li>
 
             <li>
-                <a href="./afsm.html" class="nav-link">
-                    AFSM
-                </a>
+                <a href="./afsm.html" class="nav-link">AFSM</a>
             </li>
 
             <li>
-                <a href="./odi.html" class="nav-link">
-                    Operations Data
-                </a>
+                <a href="./odi.html" class="nav-link">Operations Data</a>
             </li>
         </ul>
-
     </div>
 </nav>
+
 <header class="site-header">
     <div class="header-content">
         <div>
             <p class="eyebrow">7th Cavalry Gaming Regiment</p>
-            <h1>S3 Accountability Overview</h1>
+            <h1>S3 HQ Accountability Overview</h1>
         </div>
 
         <p class="header-subtitle">
@@ -65,21 +56,6 @@
 </header>
 
 <main class="dashboard">
-    <section class="search-panel">
-        <div class="overview-header">
-            <div>
-                <h2>Department Accountability</h2>
-                <p id="hqReportingPeriod">
-                    Loading reporting period...
-                </p>
-            </div>
-
-            <a href="./index.html" class="secondary-button page-link">
-                Individual Search
-            </a>
-        </div>
-    </section>
-
     <section class="hq-summary-grid">
         <div class="detail-card">
             <span>Total Staff</span>
@@ -110,41 +86,94 @@
     <section class="overview-panel">
         <div class="overview-header">
             <div>
-                <p class="eyebrow">Current Reporting Period</p>
-                <h2>Staff Accountability Status</h2>
+                <p class="eyebrow">Department Matrix</p>
+                <h2>Monthly Accountability Overview</h2>
             </div>
 
-            <select id="statusFilter" class="hq-filter">
-                <option value="All">Show All</option>
-                <option value="Accounted">Accounted</option>
-                <option value="Excused">Excused</option>
-                <option value="Pending">Pending</option>
-                <option value="Unexcused">Unexcused</option>
-            </select>
+            <p class="matrix-note">
+                Oldest month on the left, newest month on the right.
+            </p>
         </div>
 
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Name</th>
-                    <th>AO Position</th>
-                    <th>Status</th>
-                    <th>Submitted</th>
-                    <th>Notes</th>
-                </tr>
+        <div class="table-wrapper matrix-wrapper">
+            <table class="accountability-matrix">
+                <thead id="hqMatrixHead">
+                <!-- Filled by hq.js -->
                 </thead>
 
-                <tbody id="hqAccountabilityBody">
+                <tbody id="hqMatrixBody">
                 <tr>
-                    <td colspan="6">Loading accountability data...</td>
+                    <td>Loading accountability data...</td>
                 </tr>
                 </tbody>
             </table>
         </div>
     </section>
 </main>
+
+<div id="staffDetailModal" class="modal hidden">
+    <div class="modal-content staff-detail-modal-content">
+        <div class="modal-header">
+            <h2 id="modalStaffName">Staff Member</h2>
+
+            <button id="closeStaffDetailModalBtn" class="icon-button" type="button">
+                X
+            </button>
+        </div>
+
+        <div class="staff-details">
+            <div class="detail-card">
+                <span>Rank</span>
+                <strong id="modalStaffRank">-</strong>
+            </div>
+
+            <div class="detail-card">
+                <span>AO Position</span>
+                <strong id="modalStaffAoPosition">-</strong>
+            </div>
+
+            <div class="detail-card">
+                <span>Join Date</span>
+                <strong id="modalStaffJoinDate">-</strong>
+            </div>
+
+            <div class="detail-card">
+                <span>Last AFSM</span>
+                <strong id="modalStaffLastAfsm">-</strong>
+            </div>
+        </div>
+
+        <section class="six-month-section">
+            <h3>Last 6 Months</h3>
+
+            <div id="modalSixMonthOverview" class="month-status-grid">
+                <!-- Filled by hq.js -->
+            </div>
+        </section>
+
+        <section class="history-section">
+            <h3>Report History</h3>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Year</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Notes</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="modalReportHistoryBody">
+                    <!-- Filled by hq.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
 
 <script src="./resources/api.js"></script>
 <script src="./resources/hq.js"></script>
