@@ -17,25 +17,53 @@ const currentReportingPeriod = document.querySelector("#currentReportingPeriod")
 const currentStatus = document.querySelector("#currentStatus");
 const reportHistoryBody = document.querySelector("#reportHistoryBody");
 const sixMonthOverview = document.querySelector("#sixMonthOverview");
+const searchButton = document.querySelector("#searchButton");
 
 document.addEventListener("DOMContentLoaded", initDashboard);
 
 async function initDashboard() {
+    setSearchLoading(true);
+
     try {
         allStaff = await getReferenceStaff();
         allReports = await getAccountabilityReports();
 
         console.log("Reference staff loaded:", allStaff);
         console.log("Accountability reports loaded:", allReports);
+
+        setSearchLoading(false);
     } catch (error) {
         console.error("Failed to load dashboard data:", error);
+
         searchResults.classList.remove("hidden");
-        searchResults.innerHTML = "<p>Failed to load data from Google Sheets.</p>";
+        searchResults.innerHTML = "<p>Failed to load data from Google Sheets. Please refresh the page.</p>";
+
+        searchButton.textContent = "Data Load Failed";
+        searchButton.disabled = true;
+    }
+}
+
+function setSearchLoading(isLoading) {
+    searchButton.disabled = isLoading;
+    nameSearchInput.disabled = isLoading;
+
+    if (isLoading) {
+        searchButton.textContent = "Loading data...";
+        nameSearchInput.placeholder = "Loading staff records...";
+    } else {
+        searchButton.textContent = "Search";
+        nameSearchInput.placeholder = "Example: Ryan.BF or Ryan";
     }
 }
 
 searchForm.addEventListener("submit", function (event) {
     event.preventDefault();
+
+    if (allStaff.length === 0) {
+        searchResults.classList.remove("hidden");
+        searchResults.innerHTML = "<p>Staff data is still loading. Please wait a moment.</p>";
+        return;
+    }
 
     const searchValue = nameSearchInput.value.trim().toLowerCase();
 

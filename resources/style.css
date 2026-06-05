@@ -464,6 +464,12 @@ tr:last-child td {
     box-shadow: 0 0 0 2px var(--cav-gold);
 }
 
+button:disabled,
+input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
 @media (max-width: 800px) {
     .site-header {
         background-position: right 1rem top 1rem;
