@@ -12,14 +12,12 @@ const mostRecentOperation = document.querySelector("#mostRecentOperation");
 
 const gameFilter = document.querySelector("#gameFilter");
 const monthFilter = document.querySelector("#monthFilter");
-const rangeFilter = document.querySelector("#rangeFilter");
 const operationTableBody = document.querySelector("#operationTableBody");
 
 document.addEventListener("DOMContentLoaded", initOdiDashboard);
 
 gameFilter.addEventListener("change", applyFilters);
 monthFilter.addEventListener("change", applyFilters);
-rangeFilter.addEventListener("change", applyFilters);
 
 async function initOdiDashboard() {
     try {
@@ -71,7 +69,7 @@ function extractValidAos(staffData) {
             return staff.AO ? String(staff.AO).trim() : "";
         })
         .filter(function (ao) {
-            return ao !== "";
+            return ao !== "" && ao.toUpperCase() !== "HQ";
         });
 
     return [...new Set(aos)].sort();
@@ -127,7 +125,6 @@ function populateMonthFilter() {
 function applyFilters() {
     const selectedGame = gameFilter.value;
     const selectedMonth = monthFilter.value;
-    const selectedRange = Number(rangeFilter.value);
 
     filteredOperations = allOperations.filter(function (operation) {
         const date = parseOperationDate(operation.operationDate);
@@ -140,16 +137,16 @@ function applyFilters() {
             selectedGame === "All" ||
             String(operation.game).trim() === selectedGame;
 
-        const rangeMatches = isWithinLastMonths(date, selectedRange);
-
         let monthMatches = true;
 
         if (selectedMonth !== "All") {
             monthMatches =
                 selectedMonth === `${date.getFullYear()}-${date.getMonth() + 1}`;
+        } else {
+            monthMatches = isWithinPastYear(date);
         }
 
-        return gameMatches && rangeMatches && monthMatches;
+        return gameMatches && monthMatches;
     });
 
     renderSummary();
@@ -205,7 +202,7 @@ function renderOperationTable() {
       <td>${operation.game || "-"}</td>
       <td>${operation.operationName || "-"}</td>
       <td>${operation.attendance || "-"}</td>
-      <td>${operation.operationTimeZulu || "-"}</td>
+      <td>${formatZuluTime(operation.operationTimeZulu)}</td>
       <td>${operation.oic || "-"}</td>
       <td>${operation.primaryMc || "-"}</td>
       <td>${operation.secondaryMc || "-"}</td>
@@ -255,7 +252,9 @@ function isOverviewHeaderRow(row) {
 
         return (
             value === "TOTAL" ||
-            validAos.map(ao => ao.toUpperCase()).includes(value)
+            validAos.map(function (ao) {
+                return ao.toUpperCase();
+            }).includes(value)
         );
     });
 }
@@ -292,12 +291,12 @@ function getPastTwelveMonths() {
     return months;
 }
 
-function isWithinLastMonths(date, monthCount) {
+function isWithinPastYear(date) {
     const today = new Date();
 
     const startDate = new Date(
-        today.getFullYear(),
-        today.getMonth() - monthCount + 1,
+        today.getFullYear() - 1,
+        today.getMonth(),
         1
     );
 
@@ -349,6 +348,37 @@ function formatDate(dateValue) {
         month: "long",
         year: "numeric"
     });
+}
+
+function formatZuluTime(timeValue) {
+    if (!timeValue) {
+        return "-";
+    }
+
+    const rawValue = String(timeValue).trim();
+    const digitsOnly = rawValue.replace(/\D/g, "");
+
+    if (digitsOnly.length === 0) {
+        return "-";
+    }
+
+    if (digitsOnly.length === 1) {
+        return `0${digitsOnly}:00`;
+    }
+
+    if (digitsOnly.length === 2) {
+        return `${digitsOnly.padStart(2, "0")}:00`;
+    }
+
+    if (digitsOnly.length === 3) {
+        return `0${digitsOnly[0]}:${digitsOnly.slice(1)}`;
+    }
+
+    if (digitsOnly.length >= 4) {
+        return `${digitsOnly.slice(0, 2)}:${digitsOnly.slice(2, 4)}`;
+    }
+
+    return rawValue;
 }
 
 function getMonthName(monthNumber) {
