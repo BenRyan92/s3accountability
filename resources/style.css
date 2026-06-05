@@ -1,0 +1,492 @@
+:root {
+    --bg-main: #0f1114;
+    --bg-panel: #181b20;
+    --bg-panel-light: #22262d;
+    --bg-input: #101216;
+
+    --text-main: #f1f1f1;
+    --text-muted: #a8adb5;
+    --text-soft: #d6d6d6;
+
+    --cav-gold: #d6a84f;
+    --cav-gold-dark: #9b742f;
+    --cav-border: #343942;
+
+    --success: #5f9f5f;
+    --warning: #c9a646;
+    --danger: #b85c5c;
+    --info: #6f8fbf;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    --shadow-main: 0 18px 40px rgba(0, 0, 0, 0.35);
+    --font-main: Arial, Helvetica, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-main);
+    background:
+            radial-gradient(circle at top left, rgba(214, 168, 79, 0.12), transparent 32rem),
+            linear-gradient(135deg, #0b0d10 0%, #14171c 55%, #0b0d10 100%);
+    color: var(--text-main);
+}
+
+.site-header {
+    border-bottom: 1px solid var(--cav-border);
+    background:
+            url("../images/S3Crest.png");
+    background-repeat: no-repeat;
+    background-position: right 3rem center;
+    background-size: 80px;
+}
+
+.header-content {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+h1,
+h2,
+h3,
+p {
+    margin-top: 0;
+}
+
+h1 {
+    margin-bottom: 0;
+    color: var(--cav-gold);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+h2 {
+    color: var(--text-main);
+}
+
+h3 {
+    color: var(--cav-gold);
+}
+
+.header-subtitle {
+    max-width: 360px;
+    margin-bottom: 0;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+.eyebrow {
+    margin-bottom: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--cav-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+}
+
+.dashboard {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+}
+
+.search-panel,
+.overview-panel,
+.modal-content {
+    background: rgba(24, 27, 32, 0.96);
+    border: 1px solid var(--cav-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-main);
+}
+
+.search-panel {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-panel p {
+    color: var(--text-muted);
+}
+
+.search-form label,
+.form-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--text-soft);
+    font-weight: 700;
+}
+
+.search-row {
+    display: flex;
+    gap: 0.75rem;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 0.8rem 0.9rem;
+    color: var(--text-main);
+    background: var(--bg-input);
+    border: 1px solid var(--cav-border);
+    border-radius: var(--radius-sm);
+    font: inherit;
+}
+
+textarea {
+    resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--cav-gold);
+    box-shadow: 0 0 0 3px rgba(214, 168, 79, 0.16);
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: var(--radius-sm);
+    font: inherit;
+    font-weight: 700;
+}
+
+.search-row button,
+.primary-button,
+.secondary-button {
+    padding: 0.8rem 1rem;
+    color: #111;
+    background: linear-gradient(180deg, var(--cav-gold), var(--cav-gold-dark));
+    white-space: nowrap;
+}
+
+.search-row button:hover,
+.primary-button:hover,
+.secondary-button:hover {
+    filter: brightness(1.08);
+}
+
+.secondary-button {
+    color: #111;
+}
+
+.icon-button {
+    width: 2.2rem;
+    height: 2.2rem;
+    color: var(--text-main);
+    background: var(--bg-panel-light);
+    border: 1px solid var(--cav-border);
+}
+
+.overview-panel {
+    padding: 1.5rem;
+}
+
+.overview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.staff-details {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.9rem;
+    margin-bottom: 1.25rem;
+}
+
+.detail-card,
+.current-status-card {
+    background: var(--bg-panel-light);
+    border: 1px solid var(--cav-border);
+    border-radius: var(--radius-md);
+}
+
+.detail-card {
+    padding: 1rem;
+}
+
+.detail-card span {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.detail-card strong {
+    color: var(--text-main);
+}
+
+.current-status-card {
+    padding: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.status-pill {
+    display: inline-block;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    color: #111;
+    background: var(--warning);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.status-accounted {
+    background: var(--success);
+}
+
+.status-excused {
+    background: var(--info);
+}
+
+.status-pending {
+    background: var(--warning);
+}
+
+.status-unexcused {
+    background: var(--danger);
+    color: #fff;
+}
+
+.history-section h3 {
+    margin-bottom: 0.75rem;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--cav-border);
+    border-radius: var(--radius-md);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-panel);
+}
+
+th,
+td {
+    padding: 0.85rem;
+    text-align: left;
+    border-bottom: 1px solid var(--cav-border);
+}
+
+th {
+    color: var(--cav-gold);
+    background: #111317;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+}
+
+td {
+    color: var(--text-soft);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+.search-results {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--bg-panel-light);
+    border: 1px solid var(--cav-border);
+    border-radius: var(--radius-md);
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal-content {
+    width: min(620px, 100%);
+    padding: 1.5rem;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.report-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.submit-status {
+    margin: 0;
+    color: var(--cav-gold);
+    font-weight: 700;
+}
+
+.primary-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.six-month-section {
+    margin-bottom: 1.5rem;
+}
+
+.six-month-section h3 {
+    margin-bottom: 0.75rem;
+}
+
+.month-status-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.75rem;
+}
+
+.month-status-card {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--cav-border);
+    text-align: center;
+    background: var(--bg-panel-light);
+}
+
+.month-status-card span,
+.month-status-card small {
+    display: block;
+}
+
+.month-status-card span {
+    color: var(--text-main);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.month-status-card strong {
+    display: block;
+    margin: 0.4rem 0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.month-status-card small {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.month-status-accounted {
+    background: rgba(95, 159, 95, 0.25);
+    border-color: var(--success);
+}
+
+.month-status-accounted strong {
+    color: var(--success);
+}
+
+.month-status-excused {
+    background: rgba(201, 166, 70, 0.25);
+    border-color: var(--warning);
+}
+
+.month-status-excused strong {
+    color: var(--warning);
+}
+
+.month-status-pending {
+    background: rgba(120, 125, 135, 0.25);
+    border-color: #777d87;
+}
+
+.month-status-pending strong {
+    color: #b6bac2;
+}
+
+.month-status-unexcused {
+    background: rgba(184, 92, 92, 0.25);
+    border-color: var(--danger);
+}
+
+.month-status-unexcused strong {
+    color: var(--danger);
+}
+
+@media (max-width: 900px) {
+    .month-status-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 520px) {
+    .month-status-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.current-reporting-month {
+    box-shadow: 0 0 0 2px var(--cav-gold);
+}
+
+@media (max-width: 800px) {
+    .site-header {
+        background-position: right 1rem top 1rem;
+        background-size: 90px;
+    }
+
+    .header-content,
+    .overview-header,
+    .current-status-card,
+    .search-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-subtitle {
+        text-align: left;
+    }
+
+    .staff-details {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

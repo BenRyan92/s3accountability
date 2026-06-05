@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S3 Accountability Tracker</title>
+
+    <link rel="stylesheet" href="resources/style.css" />
+</head>
+
+<body>
+<header class="site-header">
+    <div class="header-content">
+        <div>
+            <p class="eyebrow">7th Cavalry Gaming Regiment</p>
+            <h1>S3 Accountability Tracker</h1>
+        </div>
+
+        <p class="header-subtitle">
+            Monthly accountability reporting for S3 staff.
+        </p>
+    </div>
+</header>
+
+<main class="dashboard">
+    <section class="search-panel">
+        <h2>Load Staff Record</h2>
+        <p>
+            Search by name or partial name to view S3 accountability status.
+        </p>
+
+        <form id="searchForm" class="search-form">
+            <label for="nameSearch">Name</label>
+
+            <div class="search-row">
+                <input
+                        type="text"
+                        id="nameSearch"
+                        name="nameSearch"
+                        placeholder="Example: Ryan.BF or Ryan"
+                        autocomplete="off"
+                        required
+                />
+
+                <button type="submit">Search</button>
+            </div>
+        </form>
+
+        <div id="searchResults" class="search-results hidden"></div>
+    </section>
+
+    <section id="staffOverview" class="overview-panel hidden">
+        <div class="overview-header">
+            <div>
+                <p class="eyebrow">Selected Staff Member</p>
+                <h2 id="staffName">Name Placeholder</h2>
+            </div>
+
+            <button id="openReportModalBtn" class="secondary-button">
+                Submit New Report
+            </button>
+        </div>
+
+        <div class="staff-details">
+            <div class="detail-card">
+                <span>Rank</span>
+                <strong id="staffRank">-</strong>
+            </div>
+
+            <div class="detail-card">
+                <span>AO Position</span>
+                <strong id="staffAoPosition">-</strong>
+            </div>
+
+            <div class="detail-card">
+                <span>Join Date</span>
+                <strong id="staffJoinDate">-</strong>
+            </div>
+
+            <div class="detail-card">
+                <span>Last AFSM</span>
+                <strong id="staffLastAfsm">-</strong>
+            </div>
+        </div>
+
+        <div class="current-status-card">
+            <div>
+                <p class="eyebrow">Current Reporting Period</p>
+                <h3 id="currentReportingPeriod">-</h3>
+            </div>
+
+            <div>
+                <p class="eyebrow">Current Status</p>
+                <span id="currentStatus" class="status-pill">-</span>
+            </div>
+        </div>
+        <section class="six-month-section">
+            <h3>Last 6 Months Accountability</h3>
+
+            <div id="sixMonthOverview" class="month-status-grid">
+                <!-- Filled by dashboard.js -->
+            </div>
+        </section>
+
+        <section class="history-section">
+            <h3>Report History</h3>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Year</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Notes</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="reportHistoryBody">
+                    <!-- Report history will be inserted here with JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+</main>
+
+<div id="reportModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Submit Accountability Report</h2>
+            <button id="closeReportModalBtn" class="icon-button" type="button">
+                X
+            </button>
+        </div>
+
+        <form id="reportForm" class="report-form">
+            <div class="form-group">
+                <label for="reportName">Name</label>
+                <input type="text" id="reportName" name="reportName" readonly />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="reportMonth">Report Month</label>
+                    <select id="reportMonth" name="reportMonth" required>
+                        <option value="">Select month</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="reportYear">Report Year</label>
+                    <input
+                            type="number"
+                            id="reportYear"
+                            name="reportYear"
+                            min="2024"
+                            max="2100"
+                            required
+                    />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="reportStatus">Status</label>
+                <select id="reportStatus" name="reportStatus" required>
+                    <option value="">Select status</option>
+                    <option value="Accounted">Accounted</option>
+                    <option value="Excused">Excused</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="reportNotes">Notes</label>
+                <textarea id="reportNotes">
+                        id="reportNotes"
+                        name="reportNotes"
+                        rows="5"
+                        placeholder="Write what was done during the reporting period..."
+                </textarea>
+            </div>
+
+            <p id="submitStatus" class="submit-status hidden">
+                Submitting report...
+            </p>
+
+            <button
+                    type="submit"
+                    class="primary-button"
+                    id="submitReportButton">
+                Save Report
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="./resources/api.js"></script>
+<script src="./resources/dashboard.js"></script>
+<script src="./resources/modal.js"></script>
+<script src="./resources/app.js"></script>
+</body>
+</html>
