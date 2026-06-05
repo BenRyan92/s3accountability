@@ -700,3 +700,17 @@ td.sticky-staff-column {
     max-height: 90vh;
     overflow-y: auto;
 }
+
+.hq-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 220px;
+}
+
+.hq-controls label {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}

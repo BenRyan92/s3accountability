@@ -1,4 +1,5 @@
 let hqStaff = [];
+let filteredHqStaff = [];
 let hqReports = [];
 let hqPeriods = [];
 
@@ -10,6 +11,8 @@ const accountedCount = document.querySelector("#accountedCount");
 const excusedCount = document.querySelector("#excusedCount");
 const pendingCount = document.querySelector("#pendingCount");
 const unexcusedCount = document.querySelector("#unexcusedCount");
+
+const aoFilter = document.querySelector("#aoFilter");
 
 const staffDetailModal = document.querySelector("#staffDetailModal");
 const closeStaffDetailModalBtn = document.querySelector("#closeStaffDetailModalBtn");
@@ -25,6 +28,12 @@ const modalReportHistoryBody = document.querySelector("#modalReportHistoryBody")
 
 document.addEventListener("DOMContentLoaded", initHqDashboard);
 
+aoFilter.addEventListener("change", function () {
+    applyAoFilter();
+    renderHqSummary();
+    renderHqMatrix();
+});
+
 closeStaffDetailModalBtn.addEventListener("click", closeStaffDetailModal);
 
 staffDetailModal.addEventListener("click", function (event) {
@@ -38,10 +47,13 @@ async function initHqDashboard() {
         const staffData = await getReferenceStaff();
         const reportData = await getAccountabilityReports();
 
-        hqStaff = Array.isArray(staffData) ? staffData : [];
-        hqReports = Array.isArray(reportData) ? reportData : [];
+        hqStaff = Array.isArray(staffData) ? cleanStaffData(staffData) : [];
+        filteredHqStaff = [...hqStaff];
 
+        hqReports = Array.isArray(reportData) ? reportData : [];
         hqPeriods = getLastSixReportingPeriods();
+
+        populateAoFilter();
 
         renderHqSummary();
         renderHqMatrix();
@@ -56,10 +68,49 @@ async function initHqDashboard() {
     }
 }
 
+function cleanStaffData(staffData) {
+    return staffData.filter(function (staff) {
+        return staff.Name && String(staff.Name).trim() !== "";
+    });
+}
+
+function populateAoFilter() {
+    const aoValues = hqStaff
+        .map(function (staff) {
+            return staff.AO ? String(staff.AO).trim() : "";
+        })
+        .filter(function (ao) {
+            return ao !== "";
+        });
+
+    const uniqueAoValues = [...new Set(aoValues)].sort();
+
+    uniqueAoValues.forEach(function (ao) {
+        const option = document.createElement("option");
+        option.value = ao;
+        option.textContent = ao;
+
+        aoFilter.appendChild(option);
+    });
+}
+
+function applyAoFilter() {
+    const selectedAo = aoFilter.value;
+
+    if (selectedAo === "All") {
+        filteredHqStaff = [...hqStaff];
+        return;
+    }
+
+    filteredHqStaff = hqStaff.filter(function (staff) {
+        return String(staff.AO).trim() === selectedAo;
+    });
+}
+
 function renderHqSummary() {
     const currentPeriod = getCurrentReportingPeriod();
 
-    const currentRows = hqStaff.map(function (staff) {
+    const currentRows = filteredHqStaff.map(function (staff) {
         const report = findReportForPeriod(
             staff.Name,
             currentPeriod.month,
@@ -69,7 +120,7 @@ function renderHqSummary() {
         return calculateStatus(report, currentPeriod.month, currentPeriod.year);
     });
 
-    totalStaffCount.textContent = hqStaff.length;
+    totalStaffCount.textContent = filteredHqStaff.length;
     accountedCount.textContent = countStatus(currentRows, "Accounted");
     excusedCount.textContent = countStatus(currentRows, "Excused");
     pendingCount.textContent = countStatus(currentRows, "Pending");
@@ -107,16 +158,16 @@ function renderMatrixHeader() {
 function renderMatrixBody() {
     hqMatrixBody.innerHTML = "";
 
-    if (hqStaff.length === 0) {
+    if (filteredHqStaff.length === 0) {
         hqMatrixBody.innerHTML = `
       <tr>
-        <td colspan="7">No staff members found.</td>
+        <td colspan="7">No staff members found for this AO.</td>
       </tr>
     `;
         return;
     }
 
-    hqStaff.forEach(function (staff) {
+    filteredHqStaff.forEach(function (staff) {
         const row = document.createElement("tr");
 
         const staffCell = document.createElement("td");
