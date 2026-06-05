@@ -356,18 +356,23 @@ function formatZuluTime(timeValue) {
     }
 
     const rawValue = String(timeValue).trim();
-    const digitsOnly = rawValue.replace(/\D/g, "");
 
-    if (digitsOnly.length === 0) {
-        return "-";
+    if (rawValue.includes(":")) {
+        const parts = rawValue.split(":");
+        const hours = parts[0].padStart(2, "0");
+        const minutes = parts[1].padStart(2, "0");
+
+        return `${hours}:${minutes}`;
     }
+
+    const digitsOnly = rawValue.replace(/\D/g, "");
 
     if (digitsOnly.length === 1) {
         return `0${digitsOnly}:00`;
     }
 
     if (digitsOnly.length === 2) {
-        return `${digitsOnly.padStart(2, "0")}:00`;
+        return `${digitsOnly}:00`;
     }
 
     if (digitsOnly.length === 3) {
@@ -380,6 +385,7 @@ function formatZuluTime(timeValue) {
 
     return rawValue;
 }
+
 
 function getMonthName(monthNumber) {
     const months = [

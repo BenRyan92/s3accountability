@@ -53,11 +53,5 @@ async function getOperationOverview() {
         throw new Error("Failed to load operation overview data.");
     }
 
-    const result = await response.json();
-
-    if (!result.success) {
-        throw new Error(result.error || "Failed to load operation overview data.");
-    }
-
-    return result.rows;
+    return await response.json();
 }
