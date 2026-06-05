@@ -742,6 +742,30 @@ td.sticky-staff-column {
     flex-wrap: wrap;
 }
 
+.odi-overview-table {
+    min-width: 1100px;
+}
+
+.odi-overview-table th,
+.odi-overview-table td {
+    white-space: nowrap;
+    text-align: center;
+}
+
+.odi-overview-header-row td,
+.odi-overview-header-row th {
+    color: var(--cav-gold);
+    background: #111317;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.odi-overview-summary-row td,
+.odi-overview-summary-row th {
+    background: rgba(214, 168, 79, 0.12);
+    font-weight: 800;
+}
+
 @media (max-width: 700px) {
     .odi-controls {
         width: 100%;

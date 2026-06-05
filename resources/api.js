@@ -45,3 +45,13 @@ async function getOperationInput() {
 
     return await response.json();
 }
+
+async function getOperationOverview() {
+    const response = await fetch(`${API_URL}?action=getOperationOverview`);
+
+    if (!response.ok) {
+        throw new Error("Failed to load operation overview data.");
+    }
+
+    return await response.json();
+}

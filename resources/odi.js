@@ -1,5 +1,8 @@
+let operationOverviewRows = [];
 let allOperations = [];
 let filteredOperations = [];
+
+const operationOverviewBody = document.querySelector("#operationOverviewBody");
 
 const totalOperations = document.querySelector("#totalOperations");
 const totalAttendance = document.querySelector("#totalAttendance");
@@ -17,7 +20,12 @@ monthFilter.addEventListener("change", applyFilters);
 
 async function initOdiDashboard() {
     try {
+        const overviewData = await getOperationOverview();
         const operationData = await getOperationInput();
+
+        operationOverviewRows = Array.isArray(overviewData)
+            ? cleanOverviewRows(overviewData)
+            : [];
 
         allOperations = Array.isArray(operationData)
             ? cleanOperationData(operationData)
@@ -28,22 +36,98 @@ async function initOdiDashboard() {
         populateGameFilter();
         populateMonthFilter();
 
+        renderOverviewTable();
         renderSummary();
         renderOperationTable();
     } catch (error) {
         console.error("Failed to load ODI data:", error);
 
+        operationOverviewBody.innerHTML = `
+      <tr>
+        <td>Failed to load operation overview data.</td>
+      </tr>
+    `;
+
         operationTableBody.innerHTML = `
       <tr>
-        <td colspan="9">Failed to load operation data.</td>
+        <td colspan="9">Failed to load operation input data.</td>
       </tr>
     `;
     }
 }
 
+function cleanOverviewRows(rows) {
+    return rows.filter(function (row) {
+        return row.some(function (cell) {
+            return String(cell).trim() !== "";
+        });
+    });
+}
+
+function renderOverviewTable() {
+    operationOverviewBody.innerHTML = "";
+
+    if (operationOverviewRows.length === 0) {
+        operationOverviewBody.innerHTML = `
+      <tr>
+        <td>No overview data found.</td>
+      </tr>
+    `;
+        return;
+    }
+
+    operationOverviewRows.forEach(function (row, rowIndex) {
+        const tableRow = document.createElement("tr");
+
+        if (isOverviewHeaderRow(row)) {
+            tableRow.classList.add("odi-overview-header-row");
+        }
+
+        if (isOverviewYearSummaryRow(row)) {
+            tableRow.classList.add("odi-overview-summary-row");
+        }
+
+        row.forEach(function (cell) {
+            const cellElement = document.createElement(rowIndex === 0 ? "th" : "td");
+            cellElement.textContent = cell || "";
+            tableRow.appendChild(cellElement);
+        });
+
+        operationOverviewBody.appendChild(tableRow);
+    });
+}
+
+function isOverviewHeaderRow(row) {
+    return row.some(function (cell) {
+        const value = String(cell).trim().toUpperCase();
+
+        return (
+            value === "TOTAL" ||
+            value === "ARMA" ||
+            value === "HLL" ||
+            value === "DCS" ||
+            value === "SQUAD" ||
+            value === "HLL-CONSOLE" ||
+            value === "BF6" ||
+            value === "STARTER PLATOON"
+        );
+    });
+}
+
+function isOverviewYearSummaryRow(row) {
+    return row.some(function (cell) {
+        const value = String(cell).trim().toUpperCase();
+
+        return value.includes("YEAR") || value.includes("TOTAL");
+    });
+}
+
 function cleanOperationData(operations) {
     return operations.filter(function (operation) {
-        return operation.operationName && String(operation.operationName).trim() !== "";
+        return (
+            operation.operationName &&
+            String(operation.operationName).trim() !== ""
+        );
     });
 }
 
@@ -103,7 +187,8 @@ function applyFilters() {
 
     filteredOperations = allOperations.filter(function (operation) {
         const gameMatches =
-            selectedGame === "All" || String(operation.game).trim() === selectedGame;
+            selectedGame === "All" ||
+            String(operation.game).trim() === selectedGame;
 
         const date = parseOperationDate(operation.operationDate);
         let monthMatches = true;
