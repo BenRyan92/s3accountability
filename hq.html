@@ -89,7 +89,13 @@
                 <p class="eyebrow">Department Matrix</p>
                 <h2>Monthly Accountability Overview</h2>
             </div>
-
+            <button
+                    id="openReportModalBtn"
+                    class="hq-action-button"
+                    type="button"
+            >
+                Submit Accountability
+            </button>
             <div class="hq-controls">
                 <label for="aoFilter">AO Filter</label>
 
@@ -201,7 +207,99 @@
     </div>
 </div>
 
+<div id="reportModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Submit Accountability Report</h2>
+            <button id="closeReportModalBtn" class="icon-button" type="button">
+                X
+            </button>
+        </div>
+
+        <form id="reportForm" class="report-form">
+            <div class="form-group">
+                <label for="reportStaffMember">Staff Member</label>
+
+                <input
+                        type="text"
+                        id="reportStaffMember"
+                        list="staffMemberList"
+                        placeholder="Type a name..."
+                        required
+                />
+
+                <datalist id="staffMemberList">
+                </datalist>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="reportMonth">Report Month</label>
+                    <select id="reportMonth" name="reportMonth" required>
+                        <option value="">Select month</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="reportYear">Report Year</label>
+                    <input
+                            type="number"
+                            id="reportYear"
+                            name="reportYear"
+                            min="2024"
+                            max="2100"
+                            required
+                    />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="reportStatus">Status</label>
+                <select id="reportStatus" name="reportStatus" required>
+                    <option value="">Select status</option>
+                    <option value="Accounted">Accounted</option>
+                    <option value="Excused">Excused</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="reportNotes">Notes</label>
+                <textarea
+                        id="reportNotes"
+                        name="reportNotes"
+                        rows="5"
+                        placeholder="Write what was done during the reporting period..."
+                ></textarea>
+            </div>
+
+            <p id="submitStatus" class="submit-status hidden">
+                Submitting report...
+            </p>
+
+            <button
+                    type="submit"
+                    class="primary-button"
+                    id="submitReportButton">
+                Save Report
+            </button>
+        </form>
+    </div>
+</div>
+
 <script src="./resources/api.js"></script>
+<script src="./resources/modal.js"></script>
 <script src="./resources/hq.js"></script>
 </body>
 </html>

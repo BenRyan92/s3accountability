@@ -4,6 +4,8 @@ const closeReportModalBtn = document.querySelector("#closeReportModalBtn");
 const reportForm = document.querySelector("#reportForm");
 
 const reportName = document.querySelector("#reportName");
+const reportStaffMember = document.querySelector("#reportStaffMember");
+
 const reportMonth = document.querySelector("#reportMonth");
 const reportYear = document.querySelector("#reportYear");
 const reportStatus = document.querySelector("#reportStatus");
@@ -12,27 +14,42 @@ const reportNotes = document.querySelector("#reportNotes");
 const submitButton = document.querySelector("#submitReportButton");
 const submitStatus = document.querySelector("#submitStatus");
 
-openReportModalBtn.addEventListener("click", openReportModal);
-closeReportModalBtn.addEventListener("click", closeReportModal);
+if (openReportModalBtn) {
+    openReportModalBtn.addEventListener("click", function () {
+        openReportModal();
+    });
+}
 
-reportModal.addEventListener("click", function (event) {
-    if (event.target === reportModal) {
-        closeReportModal();
-    }
-});
+if (closeReportModalBtn) {
+    closeReportModalBtn.addEventListener("click", closeReportModal);
+}
 
-reportForm.addEventListener("submit", async function (event) {
+if (reportModal) {
+    reportModal.addEventListener("click", function (event) {
+        if (event.target === reportModal) {
+            closeReportModal();
+        }
+    });
+}
+
+if (reportForm) {
+    reportForm.addEventListener("submit", handleReportSubmit);
+}
+
+async function handleReportSubmit(event) {
     event.preventDefault();
 
-    if (!selectedStaffMember) {
-        alert("No staff member selected.");
+    const selectedName = getSelectedReportName();
+
+    if (!selectedName) {
+        alert("Please select a staff member first.");
         return;
     }
 
     setSubmitLoading(true);
 
     const reportData = {
-        name: selectedStaffMember.Name,
+        name: selectedName,
         reportMonth: Number(reportMonth.value),
         reportYear: Number(reportYear.value),
         status: reportStatus.value,
@@ -46,8 +63,7 @@ reportForm.addEventListener("submit", async function (event) {
             throw new Error(result.error || "Submission failed.");
         }
 
-        allReports = await getAccountabilityReports();
-        loadStaffAccountability(selectedStaffMember.Name);
+        await refreshAccountabilityDataAfterSubmit(selectedName);
 
         closeReportModal();
         reportForm.reset();
@@ -55,21 +71,32 @@ reportForm.addEventListener("submit", async function (event) {
         alert("Accountability report submitted.");
     } catch (error) {
         console.error("Failed to submit report:", error);
-        alert("Failed to submit accountability report.");
+        alert(error.message || "Failed to submit accountability report.");
     } finally {
         setSubmitLoading(false);
     }
-});
+}
 
-function openReportModal() {
-    if (!selectedStaffMember) {
-        alert("Please select a staff member first.");
+function openReportModal(preselectedName = null) {
+    if (!reportModal) {
         return;
     }
 
     const reportingPeriod = getCurrentReportingPeriod();
 
-    reportName.value = selectedStaffMember.Name;
+    const selectedName =
+        preselectedName ||
+        getSelectedStaffMemberName() ||
+        "";
+
+    if (reportName) {
+        reportName.value = selectedName;
+    }
+
+    if (reportStaffMember) {
+        reportStaffMember.value = selectedName;
+    }
+
     reportMonth.value = reportingPeriod.month;
     reportYear.value = reportingPeriod.year;
     reportStatus.value = "";
@@ -81,10 +108,87 @@ function openReportModal() {
 }
 
 function closeReportModal() {
-    reportModal.classList.add("hidden");
+    if (reportModal) {
+        reportModal.classList.add("hidden");
+    }
+}
+
+function getSelectedReportName() {
+    if (reportStaffMember) {
+        return reportStaffMember.value;
+    }
+
+    if (reportName) {
+        return reportName.value;
+    }
+
+    return getSelectedStaffMemberName();
+}
+
+function getSelectedStaffMemberName() {
+    if (
+        typeof selectedStaffMember !== "undefined" &&
+        selectedStaffMember &&
+        selectedStaffMember.Name
+    ) {
+        return selectedStaffMember.Name;
+    }
+
+    return "";
+}
+
+async function refreshAccountabilityDataAfterSubmit(selectedName) {
+    const updatedReports = await getAccountabilityReports();
+
+    if (typeof allReports !== "undefined") {
+        allReports = updatedReports;
+    }
+
+    if (typeof hqReports !== "undefined") {
+        hqReports = updatedReports;
+    }
+
+    if (
+        typeof loadStaffAccountability === "function" &&
+        typeof selectedStaffMember !== "undefined" &&
+        selectedStaffMember &&
+        selectedStaffMember.Name
+    ) {
+        loadStaffAccountability(selectedStaffMember.Name);
+    }
+
+    if (typeof renderHqSummary === "function") {
+        renderHqSummary();
+    }
+
+    if (typeof renderHqMatrix === "function") {
+        renderHqMatrix();
+    }
+
+    if (typeof hqReports !== "undefined" && typeof openStaffDetailModal === "function") {
+        const matchingStaff =
+            typeof hqStaff !== "undefined"
+                ? hqStaff.find(function (staff) {
+                    return staff.Name === selectedName;
+                })
+                : null;
+
+        if (matchingStaff) {
+            // Refresh modal content only if the staff detail modal is currently open.
+            const staffDetailModal = document.querySelector("#staffDetailModal");
+
+            if (staffDetailModal && !staffDetailModal.classList.contains("hidden")) {
+                openStaffDetailModal(matchingStaff);
+            }
+        }
+    }
 }
 
 function setSubmitLoading(isLoading) {
+    if (!submitButton || !submitStatus) {
+        return;
+    }
+
     submitButton.disabled = isLoading;
 
     if (isLoading) {

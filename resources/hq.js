@@ -54,6 +54,7 @@ async function initHqDashboard() {
         hqPeriods = getLastSixReportingPeriods();
 
         populateAoFilter();
+        populateReportStaffDropdown();
 
         renderHqSummary();
         renderHqMatrix();
@@ -66,6 +67,31 @@ async function initHqDashboard() {
       </tr>
     `;
     }
+}
+
+function populateReportStaffDropdown() {
+
+    const staffList =
+        document.querySelector("#staffMemberList");
+
+    if (!staffList) {
+        return;
+    }
+
+    staffList.innerHTML = "";
+
+    hqStaff.forEach(function (staff) {
+
+        const option = document.createElement("option");
+
+        option.value = staff.Name;
+
+        option.label =
+            `${staff.Rank || ""} ${staff.Name} (${staff["AO Position"] || "-"})`;
+
+        staffList.appendChild(option);
+
+    });
 }
 
 function cleanStaffData(staffData) {
@@ -430,3 +456,4 @@ function formatDate(dateValue) {
         year: "numeric"
     });
 }
+

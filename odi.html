@@ -46,48 +46,69 @@
 
 <main class="dashboard">
     <section class="hq-summary-grid">
+
         <div class="detail-card">
-            <span>Total Operations</span>
-            <strong id="totalOperations">-</strong>
+            <span>This Year Total Operations</span>
+            <strong id="thisYearTotalOperations">-</strong>
         </div>
 
         <div class="detail-card">
-            <span>Total Attendance</span>
-            <strong id="totalAttendance">-</strong>
+            <span>This Year Average Attendance</span>
+            <strong id="thisYearAverageAttendance">-</strong>
         </div>
 
         <div class="detail-card">
-            <span>Average Attendance</span>
-            <strong id="averageAttendance">-</strong>
-        </div>
-
-        <div class="detail-card">
-            <span>Most Recent Operation</span>
-            <strong id="mostRecentOperation">-</strong>
+            <span>Recent Reported Operation</span>
+            <strong id="recentReportedOperation">-</strong>
         </div>
     </section>
 
     <section class="overview-panel">
+
         <div class="overview-header">
+
             <div>
-                <p class="eyebrow">Overview Tab</p>
-                <h2>AO Monthly Summary</h2>
+                <p class="eyebrow">Operations Data</p>
+                <h2>Operation Overview</h2>
             </div>
 
-            <p class="matrix-note">
-                Pulled from the ODI Overview.
-            </p>
+            <div class="odi-overview-toolbar">
+
+                <div class="odi-controls">
+
+                    <div class="hq-controls">
+                        <label for="overviewGameFilter">AO / Game</label>
+                        <select id="overviewGameFilter" class="hq-filter">
+                            <option value="">Select Overview</option>
+                            <option value="Total">Total</option>
+                        </select>
+                    </div>
+
+                    <div class="hq-controls">
+                        <label for="overviewMonthFilter">Month</label>
+                        <select id="overviewMonthFilter" class="hq-filter">
+                            <option value="All">Past 12 Months</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <button
+                        id="openOdiReportModalBtn"
+                        class="odi-report-button"
+                        type="button"
+                >
+                    Submit ODI Report
+                </button>
+
+            </div>
+
         </div>
 
-        <div class="table-wrapper matrix-wrapper">
-            <table class="odi-overview-table">
-                <tbody id="operationOverviewBody">
-                <tr>
-                    <td>Loading operation overview data...</td>
-                </tr>
-                </tbody>
-            </table>
+        <div id="operationOverviewBody" class="odi-generated-overview">
+            <p>Loading operation overview...</p>
         </div>
+
     </section>
 
     <section class="overview-panel">
@@ -140,6 +161,78 @@
     </section>
 </main>
 
+<div id="odiReportModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Submit ODI Report</h2>
+
+            <button id="closeOdiReportModalBtn" class="icon-button" type="button">
+                X
+            </button>
+        </div>
+
+        <form id="odiReportForm" class="report-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="odiOperationDate">Operation Date</label>
+                    <input type="date" id="odiOperationDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="odiGame">AO / Game</label>
+                    <select id="odiGame" required>
+                        <option value="">Select AO</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="odiOperationName">Operation Name</label>
+                <input type="text" id="odiOperationName" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="odiAttendance">Total Attendance</label>
+                    <input type="number" id="odiAttendance" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="odiOperationTimeZulu">Operation Time Zulu</label>
+                    <input type="time" id="odiOperationTimeZulu" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="odiOic">Mission OIC</label>
+                <input type="text" id="odiOic" placeholder="Lastname.F" required>
+            </div>
+
+            <div class="form-group">
+                <label for="odiPrimaryMc">Primary Mission Controller</label>
+                <input type="text" id="odiPrimaryMc" placeholder="Lastname.F" required>
+            </div>
+
+            <div class="form-group">
+                <label for="odiSecondaryMc">Secondary Mission Controller</label>
+                <input type="text" id="odiSecondaryMc" placeholder="Optional">
+            </div>
+
+            <div class="form-group">
+                <label for="odiTertiaryMc">Tertiary Mission Controller</label>
+                <input type="text" id="odiTertiaryMc" placeholder="Optional">
+            </div>
+
+            <p id="odiSubmitStatus" class="submit-status hidden">
+                Submitting ODI report...
+            </p>
+
+            <button type="submit" id="submitOdiReportButton" class="primary-button">
+                Save ODI Report
+            </button>
+        </form>
+    </div>
+</div>
 <script src="./resources/api.js"></script>
 <script src="./resources/odi.js"></script>
 </body>

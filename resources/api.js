@@ -46,11 +46,17 @@ async function getOperationInput() {
     return await response.json();
 }
 
-async function getOperationOverview() {
-    const response = await fetch(`${API_URL}?action=getOperationOverview`);
+async function submitOdiReport(reportData) {
+    const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "submitOdiReport",
+            data: reportData
+        })
+    });
 
     if (!response.ok) {
-        throw new Error("Failed to load operation overview data.");
+        throw new Error("Failed to submit ODI report.");
     }
 
     return await response.json();
