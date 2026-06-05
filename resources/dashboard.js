@@ -1,6 +1,7 @@
 let selectedStaffMember = null;
 let allStaff = [];
 let allReports = [];
+let isDataLoaded = false;
 
 const searchForm = document.querySelector("#searchForm");
 const nameSearchInput = document.querySelector("#nameSearch");
@@ -23,23 +24,34 @@ document.addEventListener("DOMContentLoaded", initDashboard);
 
 async function initDashboard() {
     setSearchLoading(true);
+    isDataLoaded = false;
 
     try {
-        allStaff = await getReferenceStaff();
-        allReports = await getAccountabilityReports();
+        const results = await Promise.all([
+            getReferenceStaff(),
+            getAccountabilityReports()
+        ]);
+
+        allStaff = results[0];
+        allReports = results[1];
 
         console.log("Reference staff loaded:", allStaff);
         console.log("Accountability reports loaded:", allReports);
 
+        isDataLoaded = true;
         setSearchLoading(false);
     } catch (error) {
         console.error("Failed to load dashboard data:", error);
 
+        isDataLoaded = false;
+
         searchResults.classList.remove("hidden");
-        searchResults.innerHTML = "<p>Failed to load data from Google Sheets. Please refresh the page.</p>";
+        searchResults.innerHTML =
+            "<p>Failed to load data from Google Sheets. Please refresh the page.</p>";
 
         searchButton.textContent = "Data Load Failed";
         searchButton.disabled = true;
+        nameSearchInput.disabled = true;
     }
 }
 
@@ -59,9 +71,10 @@ function setSearchLoading(isLoading) {
 searchForm.addEventListener("submit", function (event) {
     event.preventDefault();
 
-    if (allStaff.length === 0) {
+    if (!isDataLoaded) {
         searchResults.classList.remove("hidden");
-        searchResults.innerHTML = "<p>Staff data is still loading. Please wait a moment.</p>";
+        searchResults.innerHTML =
+            "<p>Accountability data is still loading. Please wait a moment.</p>";
         return;
     }
 
@@ -103,6 +116,11 @@ function displaySearchResults(matches) {
 }
 
 function selectStaffMember(staff) {
+    if (!isDataLoaded) {
+        alert("Accountability data is still loading. Please wait a moment.");
+        return;
+    }
+
     selectedStaffMember = staff;
 
     staffName.textContent = `${staff.Rank || ""} ${staff.Name}`;
