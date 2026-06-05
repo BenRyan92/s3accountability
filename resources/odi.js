@@ -1,6 +1,7 @@
 let operationOverviewRows = [];
 let allOperations = [];
 let filteredOperations = [];
+let validAos = [];
 
 const operationOverviewBody = document.querySelector("#operationOverviewBody");
 
@@ -11,21 +12,26 @@ const mostRecentOperation = document.querySelector("#mostRecentOperation");
 
 const gameFilter = document.querySelector("#gameFilter");
 const monthFilter = document.querySelector("#monthFilter");
+const rangeFilter = document.querySelector("#rangeFilter");
 const operationTableBody = document.querySelector("#operationTableBody");
 
 document.addEventListener("DOMContentLoaded", initOdiDashboard);
 
 gameFilter.addEventListener("change", applyFilters);
 monthFilter.addEventListener("change", applyFilters);
+rangeFilter.addEventListener("change", applyFilters);
 
 async function initOdiDashboard() {
     try {
         const overviewData = await getOperationOverview();
         const operationData = await getOperationInput();
+        const staffData = await getReferenceStaff();
 
         operationOverviewRows = Array.isArray(overviewData)
             ? cleanOverviewRows(overviewData)
             : [];
+
+        validAos = extractValidAos(staffData);
 
         allOperations = Array.isArray(operationData)
             ? cleanOperationData(operationData)
@@ -36,9 +42,8 @@ async function initOdiDashboard() {
         populateGameFilter();
         populateMonthFilter();
 
+        applyFilters();
         renderOverviewTable();
-        renderSummary();
-        renderOperationTable();
     } catch (error) {
         console.error("Failed to load ODI data:", error);
 
@@ -56,6 +61,38 @@ async function initOdiDashboard() {
     }
 }
 
+function extractValidAos(staffData) {
+    if (!Array.isArray(staffData)) {
+        return [];
+    }
+
+    const aos = staffData
+        .map(function (staff) {
+            return staff.AO ? String(staff.AO).trim() : "";
+        })
+        .filter(function (ao) {
+            return ao !== "";
+        });
+
+    return [...new Set(aos)].sort();
+}
+
+function cleanOperationData(operations) {
+    return operations.filter(function (operation) {
+        const operationNameIsValid =
+            operation.operationName &&
+            String(operation.operationName).trim() !== "";
+
+        const gameIsValid =
+            operation.game &&
+            validAos.includes(String(operation.game).trim());
+
+        const date = parseOperationDate(operation.operationDate);
+
+        return operationNameIsValid && gameIsValid && date;
+    });
+}
+
 function cleanOverviewRows(rows) {
     return rows.filter(function (row) {
         return row.some(function (cell) {
@@ -64,118 +101,24 @@ function cleanOverviewRows(rows) {
     });
 }
 
-function renderOverviewTable() {
-    operationOverviewBody.innerHTML = "";
-
-    if (operationOverviewRows.length === 0) {
-        operationOverviewBody.innerHTML = `
-      <tr>
-        <td>No overview data found.</td>
-      </tr>
-    `;
-        return;
-    }
-
-    operationOverviewRows.forEach(function (row, rowIndex) {
-        const tableRow = document.createElement("tr");
-
-        if (isOverviewHeaderRow(row)) {
-            tableRow.classList.add("odi-overview-header-row");
-        }
-
-        if (isOverviewYearSummaryRow(row)) {
-            tableRow.classList.add("odi-overview-summary-row");
-        }
-
-        row.forEach(function (cell) {
-            const cellElement = document.createElement(rowIndex === 0 ? "th" : "td");
-            cellElement.textContent = cell || "";
-            tableRow.appendChild(cellElement);
-        });
-
-        operationOverviewBody.appendChild(tableRow);
-    });
-}
-
-function isOverviewHeaderRow(row) {
-    return row.some(function (cell) {
-        const value = String(cell).trim().toUpperCase();
-
-        return (
-            value === "TOTAL" ||
-            value === "ARMA" ||
-            value === "HLL" ||
-            value === "DCS" ||
-            value === "SQUAD" ||
-            value === "HLL-CONSOLE" ||
-            value === "BF6" ||
-            value === "STARTER PLATOON"
-        );
-    });
-}
-
-function isOverviewYearSummaryRow(row) {
-    return row.some(function (cell) {
-        const value = String(cell).trim().toUpperCase();
-
-        return value.includes("YEAR") || value.includes("TOTAL");
-    });
-}
-
-function cleanOperationData(operations) {
-    return operations.filter(function (operation) {
-        return (
-            operation.operationName &&
-            String(operation.operationName).trim() !== ""
-        );
-    });
-}
-
 function populateGameFilter() {
-    const games = allOperations
-        .map(function (operation) {
-            return operation.game ? String(operation.game).trim() : "";
-        })
-        .filter(function (game) {
-            return game !== "";
-        });
-
-    const uniqueGames = [...new Set(games)].sort();
-
-    uniqueGames.forEach(function (game) {
+    validAos.forEach(function (ao) {
         const option = document.createElement("option");
-        option.value = game;
-        option.textContent = game;
+        option.value = ao;
+        option.textContent = ao;
 
         gameFilter.appendChild(option);
     });
 }
 
 function populateMonthFilter() {
-    const months = allOperations
-        .map(function (operation) {
-            const date = parseOperationDate(operation.operationDate);
+    const pastMonths = getPastTwelveMonths();
 
-            if (!date) {
-                return "";
-            }
-
-            return `${date.getFullYear()}-${date.getMonth() + 1}`;
-        })
-        .filter(function (month) {
-            return month !== "";
-        });
-
-    const uniqueMonths = [...new Set(months)].sort().reverse();
-
-    uniqueMonths.forEach(function (monthValue) {
-        const parts = monthValue.split("-");
-        const year = Number(parts[0]);
-        const month = Number(parts[1]);
-
+    pastMonths.forEach(function (period) {
         const option = document.createElement("option");
-        option.value = monthValue;
-        option.textContent = `${getMonthName(month)} ${year}`;
+
+        option.value = `${period.year}-${period.month}`;
+        option.textContent = `${getMonthName(period.month)} ${period.year}`;
 
         monthFilter.appendChild(option);
     });
@@ -184,25 +127,29 @@ function populateMonthFilter() {
 function applyFilters() {
     const selectedGame = gameFilter.value;
     const selectedMonth = monthFilter.value;
+    const selectedRange = Number(rangeFilter.value);
 
     filteredOperations = allOperations.filter(function (operation) {
+        const date = parseOperationDate(operation.operationDate);
+
+        if (!date) {
+            return false;
+        }
+
         const gameMatches =
             selectedGame === "All" ||
             String(operation.game).trim() === selectedGame;
 
-        const date = parseOperationDate(operation.operationDate);
+        const rangeMatches = isWithinLastMonths(date, selectedRange);
+
         let monthMatches = true;
 
         if (selectedMonth !== "All") {
-            if (!date) {
-                monthMatches = false;
-            } else {
-                monthMatches =
-                    selectedMonth === `${date.getFullYear()}-${date.getMonth() + 1}`;
-            }
+            monthMatches =
+                selectedMonth === `${date.getFullYear()}-${date.getMonth() + 1}`;
         }
 
-        return gameMatches && monthMatches;
+        return gameMatches && rangeMatches && monthMatches;
     });
 
     renderSummary();
@@ -247,14 +194,7 @@ function renderOperationTable() {
     }
 
     const sortedOperations = [...filteredOperations].sort(function (a, b) {
-        const dateA = parseOperationDate(a.operationDate);
-        const dateB = parseOperationDate(b.operationDate);
-
-        if (!dateA || !dateB) {
-            return 0;
-        }
-
-        return dateB - dateA;
+        return parseOperationDate(b.operationDate) - parseOperationDate(a.operationDate);
     });
 
     sortedOperations.forEach(function (operation) {
@@ -276,20 +216,110 @@ function renderOperationTable() {
     });
 }
 
+function renderOverviewTable() {
+    operationOverviewBody.innerHTML = "";
+
+    if (operationOverviewRows.length === 0) {
+        operationOverviewBody.innerHTML = `
+      <tr>
+        <td>No overview data found. Check Apps Script action getOperationOverview.</td>
+      </tr>
+    `;
+        return;
+    }
+
+    operationOverviewRows.forEach(function (row, rowIndex) {
+        const tableRow = document.createElement("tr");
+
+        if (isOverviewHeaderRow(row)) {
+            tableRow.classList.add("odi-overview-header-row");
+        }
+
+        if (isOverviewYearSummaryRow(row)) {
+            tableRow.classList.add("odi-overview-summary-row");
+        }
+
+        row.forEach(function (cell) {
+            const cellElement = document.createElement(rowIndex === 0 ? "th" : "td");
+            cellElement.textContent = cell || "";
+            tableRow.appendChild(cellElement);
+        });
+
+        operationOverviewBody.appendChild(tableRow);
+    });
+}
+
+function isOverviewHeaderRow(row) {
+    return row.some(function (cell) {
+        const value = String(cell).trim().toUpperCase();
+
+        return (
+            value === "TOTAL" ||
+            validAos.map(ao => ao.toUpperCase()).includes(value)
+        );
+    });
+}
+
+function isOverviewYearSummaryRow(row) {
+    return row.some(function (cell) {
+        const value = String(cell).trim().toUpperCase();
+
+        return value.includes("YEAR") || value.includes("TOTAL");
+    });
+}
+
+function getPastTwelveMonths() {
+    const months = [];
+    const today = new Date();
+
+    let month = today.getMonth() + 1;
+    let year = today.getFullYear();
+
+    for (let i = 0; i < 12; i++) {
+        months.push({
+            month: month,
+            year: year
+        });
+
+        month--;
+
+        if (month === 0) {
+            month = 12;
+            year--;
+        }
+    }
+
+    return months;
+}
+
+function isWithinLastMonths(date, monthCount) {
+    const today = new Date();
+
+    const startDate = new Date(
+        today.getFullYear(),
+        today.getMonth() - monthCount + 1,
+        1
+    );
+
+    const endDate = new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        0,
+        23,
+        59,
+        59
+    );
+
+    return date >= startDate && date <= endDate;
+}
+
 function getNewestOperation(operations) {
     if (operations.length === 0) {
         return null;
     }
 
     return [...operations].sort(function (a, b) {
-        const dateA = parseOperationDate(a.operationDate);
-        const dateB = parseOperationDate(b.operationDate);
-
-        if (!dateA || !dateB) {
-            return 0;
-        }
-
-        return dateB - dateA;
+        return parseOperationDate(b.operationDate) - parseOperationDate(a.operationDate);
     })[0];
 }
 
@@ -316,7 +346,7 @@ function formatDate(dateValue) {
 
     return date.toLocaleDateString("en-GB", {
         day: "2-digit",
-        month: "short",
+        month: "long",
         year: "numeric"
     });
 }

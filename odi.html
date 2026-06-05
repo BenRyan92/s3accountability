@@ -99,16 +99,24 @@
 
             <div class="odi-controls">
                 <div class="hq-controls">
-                    <label for="gameFilter">Game</label>
+                    <label for="gameFilter">AO / Game</label>
                     <select id="gameFilter" class="hq-filter">
-                        <option value="All">All Games</option>
+                        <option value="All">All Valid AOs</option>
                     </select>
                 </div>
 
                 <div class="hq-controls">
                     <label for="monthFilter">Month</label>
                     <select id="monthFilter" class="hq-filter">
-                        <option value="All">All Months</option>
+                        <option value="All">Past 12 Months</option>
+                    </select>
+                </div>
+
+                <div class="hq-controls">
+                    <label for="rangeFilter">History Range</label>
+                    <select id="rangeFilter" class="hq-filter">
+                        <option value="1">Last 1 Month</option>
+                        <option value="3" selected>Last 3 Months</option>
                     </select>
                 </div>
             </div>
