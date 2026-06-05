@@ -41,8 +41,6 @@ body {
 
 .site-header {
     border-bottom: 1px solid var(--cav-border);
-    background:
-            url("../images/S3Crest.png");
     background-repeat: no-repeat;
     background-position: right 3rem center;
     background-size: 80px;
@@ -713,4 +711,26 @@ td.sticky-staff-column {
     font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
+}
+
+.accountability-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+
+    background: var(--bg-panel-light);
+    border: 1px solid var(--cav-border);
+    border-radius: var(--radius-md);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 600;
 }
