@@ -27,19 +27,16 @@ async function initDashboard() {
     isDataLoaded = false;
 
     try {
-        const results = await Promise.all([
-            getReferenceStaff(),
-            getAccountabilityReports()
-        ]);
+        const staffData = await getReferenceStaff();
+        const reportData = await getAccountabilityReports();
 
-        allStaff = results[0];
-        allReports = results[1];
+        allStaff = Array.isArray(staffData) ? staffData : [];
+        allReports = Array.isArray(reportData) ? reportData : [];
 
         console.log("Reference staff loaded:", allStaff);
         console.log("Accountability reports loaded:", allReports);
 
         isDataLoaded = true;
-        setSearchLoading(false);
     } catch (error) {
         console.error("Failed to load dashboard data:", error);
 
@@ -48,10 +45,8 @@ async function initDashboard() {
         searchResults.classList.remove("hidden");
         searchResults.innerHTML =
             "<p>Failed to load data from Google Sheets. Please refresh the page.</p>";
-
-        searchButton.textContent = "Data Load Failed";
-        searchButton.disabled = true;
-        nameSearchInput.disabled = true;
+    } finally {
+        setSearchLoading(false);
     }
 }
 
