@@ -734,3 +734,16 @@ td.sticky-staff-column {
     font-size: 0.9rem;
     font-weight: 600;
 }
+
+.odi-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 700px) {
+    .odi-controls {
+        width: 100%;
+    }
+}

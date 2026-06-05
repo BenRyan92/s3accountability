@@ -35,3 +35,13 @@ async function submitAccountabilityReport(reportData) {
 
     return await response.json();
 }
+
+async function getOperationInput() {
+    const response = await fetch(`${API_URL}?action=getOperationInput`);
+
+    if (!response.ok) {
+        throw new Error("Failed to load operation input data.");
+    }
+
+    return await response.json();
+}

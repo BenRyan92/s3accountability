@@ -1,64 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Coming Soon</title>
-    <link rel="stylesheet" href="./resources/style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Operations Data Input</title>
+
+    <link rel="stylesheet" href="./resources/style.css" />
 </head>
 
 <body>
 <nav class="main-nav">
     <div class="nav-container">
-
         <div class="nav-brand">
             <img
                     src="https://wiki.7cav.us/images/0/04/S3Crest.png?20200702032251"
                     alt="S3 Crest"
                     class="nav-logo"
-            >
+            />
 
-            <span>S3 Operations</span>
+            <span>S3 Operations Tracker</span>
         </div>
 
         <ul class="nav-links">
-            <li>
-                <a href="./index.html" class="nav-link">
-                    Home
-                </a>
-            </li>
-
-            <li>
-                <a href="./hq.html" class="nav-link">
-                    Staff Overview
-                </a>
-            </li>
-
-            <li>
-                <a href="./afsm.html" class="nav-link">
-                    AFSM
-                </a>
-            </li>
-
-            <li>
-                <a href="./odi.html" class="nav-link  active">
-                    Operations Data
-                </a>
-            </li>
+            <li><a href="./index.html" class="nav-link">Home</a></li>
+            <li><a href="./hq.html" class="nav-link">Staff Overview</a></li>
+            <li><a href="./afsm.html" class="nav-link">AFSM</a></li>
+            <li><a href="./odi.html" class="nav-link active">Operations Data</a></li>
         </ul>
-
     </div>
 </nav>
-<!-- Same navigation bar here -->
+
+<header class="site-header">
+    <div class="header-content">
+        <div>
+            <p class="eyebrow">7th Cavalry Gaming Regiment</p>
+            <h1>Operations Data Input</h1>
+        </div>
+
+        <p class="header-subtitle">
+            Operation attendance and controller tracking.
+        </p>
+    </div>
+</header>
 
 <main class="dashboard">
-    <section class="overview-panel">
-        <h1>Coming Soon</h1>
+    <section class="hq-summary-grid">
+        <div class="detail-card">
+            <span>Total Operations</span>
+            <strong id="totalOperations">-</strong>
+        </div>
 
-        <p>
-            This module is currently under development.
-        </p>
+        <div class="detail-card">
+            <span>Total Attendance</span>
+            <strong id="totalAttendance">-</strong>
+        </div>
+
+        <div class="detail-card">
+            <span>Average Attendance</span>
+            <strong id="averageAttendance">-</strong>
+        </div>
+
+        <div class="detail-card">
+            <span>Most Recent Operation</span>
+            <strong id="mostRecentOperation">-</strong>
+        </div>
+    </section>
+
+    <section class="overview-panel">
+        <div class="overview-header">
+            <div>
+                <p class="eyebrow">Operations Overview</p>
+                <h2>Operation History</h2>
+            </div>
+
+            <div class="odi-controls">
+                <div class="hq-controls">
+                    <label for="gameFilter">Game</label>
+                    <select id="gameFilter" class="hq-filter">
+                        <option value="All">All Games</option>
+                    </select>
+                </div>
+
+                <div class="hq-controls">
+                    <label for="monthFilter">Month</label>
+                    <select id="monthFilter" class="hq-filter">
+                        <option value="All">All Months</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Game</th>
+                    <th>Operation</th>
+                    <th>Attendance</th>
+                    <th>Time Zulu</th>
+                    <th>OIC</th>
+                    <th>Primary MC</th>
+                    <th>Secondary MC</th>
+                    <th>Tertiary MC</th>
+                </tr>
+                </thead>
+
+                <tbody id="operationTableBody">
+                <tr>
+                    <td colspan="9">Loading operation data...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </section>
 </main>
 
+<script src="./resources/api.js"></script>
+<script src="./resources/odi.js"></script>
 </body>
 </html>
