@@ -216,7 +216,7 @@ function renderBbcodeOutput() {
     });
 
     lines.push("");
-    lines.push("Awarded for being assigned to a non-combat department and serving with distinction for a period of 12 consecutive months.[/CENTER]");
+    lines.push("Awarded for being assigned to a non-combat department and serving with distinction for a period of 12 consecutive months.");
     lines.push("");
     lines.push("[B]Congratulations![/B][/CENTER]");
 
