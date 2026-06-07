@@ -14,6 +14,8 @@ const reportNotes = document.querySelector("#reportNotes");
 const submitButton = document.querySelector("#submitReportButton");
 const submitStatus = document.querySelector("#submitStatus");
 
+let editingExistingReport = false;
+
 if (openReportModalBtn) {
     openReportModalBtn.addEventListener("click", function () {
         openReportModal();
@@ -34,6 +36,20 @@ if (reportModal) {
 
 if (reportForm) {
     reportForm.addEventListener("submit", handleReportSubmit);
+}
+
+if (reportStaffMember) {
+    reportStaffMember.addEventListener("change", populateExistingReportIfFound);
+    reportStaffMember.addEventListener("input", populateExistingReportIfFound);
+}
+
+if (reportMonth) {
+    reportMonth.addEventListener("change", populateExistingReportIfFound);
+}
+
+if (reportYear) {
+    reportYear.addEventListener("input", populateExistingReportIfFound);
+    reportYear.addEventListener("change", populateExistingReportIfFound);
 }
 
 async function handleReportSubmit(event) {
@@ -68,7 +84,10 @@ async function handleReportSubmit(event) {
         closeReportModal();
         reportForm.reset();
 
-        alert("Accountability report submitted.");
+        alert(result.updated
+            ? "Accountability report updated."
+            : "Accountability report submitted."
+        );
     } catch (error) {
         console.error("Failed to submit report:", error);
         alert(error.message || "Failed to submit accountability report.");
@@ -102,7 +121,11 @@ function openReportModal(preselectedName = null) {
     reportStatus.value = "";
     reportNotes.value = "";
 
+    editingExistingReport = false;
+
     setSubmitLoading(false);
+    updateSubmitButtonMode();
+    populateExistingReportIfFound();
 
     reportModal.classList.remove("hidden");
 }
@@ -113,13 +136,68 @@ function closeReportModal() {
     }
 }
 
+function populateExistingReportIfFound() {
+    const selectedName = getSelectedReportName();
+    const selectedMonth = Number(reportMonth.value);
+    const selectedYear = Number(reportYear.value);
+
+    if (!selectedName || !selectedMonth || !selectedYear) {
+        editingExistingReport = false;
+        updateSubmitButtonMode();
+        return;
+    }
+
+    const existingReport = findExistingReport(
+        selectedName,
+        selectedMonth,
+        selectedYear
+    );
+
+    if (!existingReport) {
+        editingExistingReport = false;
+        updateSubmitButtonMode();
+        return;
+    }
+
+    editingExistingReport = true;
+
+    reportStatus.value = existingReport.Status || "";
+    reportNotes.value = existingReport.Notes || "";
+
+    updateSubmitButtonMode();
+}
+
+function findExistingReport(name, month, year) {
+    const reports = getCurrentReportsArray();
+
+    return reports.find(function (report) {
+        return (
+            String(report.Name).trim().toLowerCase() === String(name).trim().toLowerCase() &&
+            Number(report.ReportMonth) === month &&
+            Number(report.ReportYear) === year
+        );
+    });
+}
+
+function getCurrentReportsArray() {
+    if (typeof allReports !== "undefined" && Array.isArray(allReports)) {
+        return allReports;
+    }
+
+    if (typeof hqReports !== "undefined" && Array.isArray(hqReports)) {
+        return hqReports;
+    }
+
+    return [];
+}
+
 function getSelectedReportName() {
     if (reportStaffMember) {
-        return reportStaffMember.value;
+        return reportStaffMember.value.trim();
     }
 
     if (reportName) {
-        return reportName.value;
+        return reportName.value.trim();
     }
 
     return getSelectedStaffMemberName();
@@ -165,23 +243,31 @@ async function refreshAccountabilityDataAfterSubmit(selectedName) {
         renderHqMatrix();
     }
 
-    if (typeof hqReports !== "undefined" && typeof openStaffDetailModal === "function") {
-        const matchingStaff =
-            typeof hqStaff !== "undefined"
-                ? hqStaff.find(function (staff) {
-                    return staff.Name === selectedName;
-                })
-                : null;
+    if (typeof hqStaff !== "undefined" && typeof openStaffDetailModal === "function") {
+        const matchingStaff = hqStaff.find(function (staff) {
+            return staff.Name === selectedName;
+        });
 
-        if (matchingStaff) {
-            // Refresh modal content only if the staff detail modal is currently open.
-            const staffDetailModal = document.querySelector("#staffDetailModal");
+        const staffDetailModal = document.querySelector("#staffDetailModal");
 
-            if (staffDetailModal && !staffDetailModal.classList.contains("hidden")) {
-                openStaffDetailModal(matchingStaff);
-            }
+        if (
+            matchingStaff &&
+            staffDetailModal &&
+            !staffDetailModal.classList.contains("hidden")
+        ) {
+            openStaffDetailModal(matchingStaff);
         }
     }
+}
+
+function updateSubmitButtonMode() {
+    if (!submitButton) {
+        return;
+    }
+
+    submitButton.textContent = editingExistingReport
+        ? "Update Report"
+        : "Save Report";
 }
 
 function setSubmitLoading(isLoading) {
@@ -192,10 +278,13 @@ function setSubmitLoading(isLoading) {
     submitButton.disabled = isLoading;
 
     if (isLoading) {
-        submitButton.textContent = "Submitting...";
+        submitButton.textContent = editingExistingReport
+            ? "Updating..."
+            : "Submitting...";
+
         submitStatus.classList.remove("hidden");
     } else {
-        submitButton.textContent = "Save Report";
         submitStatus.classList.add("hidden");
+        updateSubmitButtonMode();
     }
 }
