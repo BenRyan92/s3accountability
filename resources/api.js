@@ -61,3 +61,13 @@ async function submitOdiReport(reportData) {
 
     return await response.json();
 }
+
+async function getReferenceActiveMilpac() {
+    const response = await fetch(`${API_URL}?action=getReferenceActiveMilpac`);
+
+    if (!response.ok) {
+        throw new Error("Failed to load ReferenceActiveMILPAC.");
+    }
+
+    return await response.json();
+}

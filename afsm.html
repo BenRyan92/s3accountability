@@ -1,64 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Coming Soon</title>
-    <link rel="stylesheet" href="./resources/style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>AFSM Tracker</title>
+
+    <link rel="stylesheet" href="./resources/style.css?v=1.0.5" />
 </head>
 
 <body>
 <nav class="main-nav">
     <div class="nav-container">
-
         <div class="nav-brand">
             <img
                     src="https://wiki.7cav.us/images/0/04/S3Crest.png?20200702032251"
                     alt="S3 Crest"
                     class="nav-logo"
-            >
-
+            />
             <span>S3 Operations</span>
         </div>
 
         <ul class="nav-links">
-            <li>
-                <a href="./index.html" class="nav-link">
-                    Home
-                </a>
-            </li>
-
-            <li>
-                <a href="./hq.html" class="nav-link">
-                    Staff Overview
-                </a>
-            </li>
-
-            <li>
-                <a href="./afsm.html" class="nav-link  active">
-                    AFSM
-                </a>
-            </li>
-
-            <li>
-                <a href="./odi.html" class="nav-link">
-                    Operations Data
-                </a>
-            </li>
+            <li><a href="./index.html" class="nav-link">Home</a></li>
+            <li><a href="./hq.html" class="nav-link">Staff Overview</a></li>
+            <li><a href="./afsm.html" class="nav-link active">AFSM</a></li>
+            <li><a href="./odi.html" class="nav-link">Operations Data</a></li>
         </ul>
-
     </div>
 </nav>
-<!-- Same navigation bar here -->
+
+<header class="site-header">
+    <div class="header-content">
+        <div>
+            <p class="eyebrow">7th Cavalry Gaming Regiment</p>
+            <h1>AFSM Tracker</h1>
+        </div>
+
+        <p class="header-subtitle">
+            Armed Forces Service Medal eligibility and recommendation builder for S3.
+        </p>
+    </div>
+</header>
 
 <main class="dashboard">
-    <section class="overview-panel">
-        <h1>Coming Soon</h1>
+    <section class="hq-summary-grid afsm-summary-grid">
+        <div class="detail-card">
+            <span>Eligible Now</span>
+            <strong id="eligibleNowCount">-</strong>
+        </div>
 
-        <p>
-            This module is currently under development.
-        </p>
+        <div class="detail-card">
+            <span>Upcoming 30 Days</span>
+            <strong id="upcomingCount">-</strong>
+        </div>
+
+        <div class="detail-card">
+            <span>Total S3 Staff</span>
+            <strong id="totalAfsmStaffCount">-</strong>
+        </div>
+    </section>
+
+    <section class="overview-panel">
+        <div class="overview-header">
+            <div>
+                <p class="eyebrow">AFSM Eligibility</p>
+                <h2>Staff Up for AFSM Recommendation</h2>
+            </div>
+
+            <button id="copyAfsmBbcodeBtn" class="primary-button" type="button">
+                Copy BBCode
+            </button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Period Start</th>
+                    <th>Eligible Date</th>
+                    <th>Milpac</th>
+                </tr>
+                </thead>
+
+                <tbody id="afsmEligibleBody">
+                <tr>
+                    <td colspan="5">Loading AFSM eligibility data...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="overview-panel">
+        <div class="overview-header">
+            <div>
+                <p class="eyebrow">Template Builder</p>
+                <h2>AFSM BBCode Output</h2>
+            </div>
+        </div>
+
+        <textarea
+                id="afsmBbcodeOutput"
+                class="afsm-bbcode-output"
+                readonly
+                placeholder="Eligible AFSM recommendation BBCode will appear here..."
+        ></textarea>
     </section>
 </main>
 
+<script src="./resources/api.js?v=1.0.5"></script>
+<script src="./resources/afsm.js?v=1.0.5"></script>
 </body>
 </html>
