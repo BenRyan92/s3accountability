@@ -3,6 +3,40 @@ let activeMilpac = [];
 let eligibleStaff = [];
 let upcomingStaff = [];
 
+const rankOrder = {
+    GEN: 30,
+    LTG: 29,
+    MG: 28,
+    BG: 27,
+
+    COL: 26,
+    LTC: 25,
+    MAJ: 24,
+    CPT: 23,
+    "1LT": 22,
+    "2LT": 21,
+
+    CW5: 20,
+    CW4: 19,
+    CW3: 18,
+    CW2: 17,
+    WO1: 16,
+
+    CSM: 15,
+    SGM: 14,
+    "1SG": 13,
+    MSG: 12,
+    SFC: 11,
+    SSG: 10,
+    SGT: 9,
+    CPL: 8,
+
+    SPC: 7,
+    PFC: 6,
+    PV2: 5,
+    PVT: 4
+};
+
 const eligibleNowCount = document.querySelector("#eligibleNowCount");
 const upcomingCount = document.querySelector("#upcomingCount");
 const totalAfsmStaffCount = document.querySelector("#totalAfsmStaffCount");
@@ -13,7 +47,9 @@ const copyAfsmBbcodeBtn = document.querySelector("#copyAfsmBbcodeBtn");
 
 document.addEventListener("DOMContentLoaded", initAfsmModule);
 
-copyAfsmBbcodeBtn.addEventListener("click", copyAfsmBbcode);
+if (copyAfsmBbcodeBtn) {
+    copyAfsmBbcodeBtn.addEventListener("click", copyAfsmBbcode);
+}
 
 async function initAfsmModule() {
     try {
@@ -72,7 +108,6 @@ function calculateAfsmEligibility() {
 
         const eligibleDate = addMonths(baseDate, 12);
         const daysUntilEligible = getDaysBetween(today, eligibleDate);
-
         const milpacRecord = findMilpacRecord(staff.Name);
 
         const record = {
@@ -94,13 +129,8 @@ function calculateAfsmEligibility() {
         }
     });
 
-    eligibleStaff.sort(function (a, b) {
-        return a.eligibleDate - b.eligibleDate;
-    });
-
-    upcomingStaff.sort(function (a, b) {
-        return a.eligibleDate - b.eligibleDate;
-    });
+    sortByRankThenName(eligibleStaff);
+    sortByRankThenName(upcomingStaff);
 }
 
 function getAfsmBaseDate(staff) {
@@ -145,7 +175,7 @@ function renderEligibleTable() {
         const row = document.createElement("tr");
 
         row.innerHTML = `
-            <td>${staff.fullRank || staff.rank}</td>
+            <td>${getDisplayRank(staff)}</td>
             <td>${staff.fullName || staff.name}</td>
             <td>${formatDate(staff.periodStart)}</td>
             <td>${formatDate(staff.eligibleDate)}</td>
@@ -192,8 +222,10 @@ function renderBbcodeOutput() {
 }
 
 function buildTrooperBbcodeLine(staff) {
-    const displayName = `${staff.fullRank || staff.rank} ${staff.fullName || staff.name}`;
-    const periodText = `for S3 Dept. ${formatPeriod(staff.periodStart)} to ${formatPeriod(staff.periodEnd)}`;
+    const displayRank = getDisplayRank(staff);
+    const displayName = `${displayRank} ${staff.fullName || staff.name}`;
+    const periodText =
+        `for S3 Dept. ${formatPeriod(staff.periodStart)} to ${formatPeriod(staff.periodEnd)}`;
 
     if (staff.milpacLink) {
         return `[URL='${staff.milpacLink}']${displayName}[/URL] ${periodText}`;
@@ -219,6 +251,67 @@ async function copyAfsmBbcode() {
         document.execCommand("copy");
         alert("AFSM BBCode copied.");
     }
+}
+
+function sortByRankThenName(staffArray) {
+    staffArray.sort(function (a, b) {
+        const rankDifference = getRankValue(b) - getRankValue(a);
+
+        if (rankDifference !== 0) {
+            return rankDifference;
+        }
+
+        const nameA = String(a.fullName || a.name || "").toLowerCase();
+        const nameB = String(b.fullName || b.name || "").toLowerCase();
+
+        return nameA.localeCompare(nameB);
+    });
+}
+
+function getRankValue(staff) {
+    const rank = String(staff.rank || "").trim().toUpperCase();
+
+    return rankOrder[rank] || 0;
+}
+
+function getDisplayRank(staff) {
+    if (staff.fullRank && String(staff.fullRank).trim() !== "") {
+        return staff.fullRank;
+    }
+
+    const rankMap = {
+        PVT: "Private",
+        PV2: "Private Second Class",
+        PFC: "Private First Class",
+        SPC: "Specialist",
+        CPL: "Corporal",
+        SGT: "Sergeant",
+        SSG: "Staff Sergeant",
+        SFC: "Sergeant First Class",
+        MSG: "Master Sergeant",
+        "1SG": "First Sergeant",
+        SGM: "Sergeant Major",
+        CSM: "Command Sergeant Major",
+        WO1: "Warrant Officer 1",
+        CW2: "Chief Warrant Officer 2",
+        CW3: "Chief Warrant Officer 3",
+        CW4: "Chief Warrant Officer 4",
+        CW5: "Chief Warrant Officer 5",
+        "2LT": "Second Lieutenant",
+        "1LT": "First Lieutenant",
+        CPT: "Captain",
+        MAJ: "Major",
+        LTC: "Lieutenant Colonel",
+        COL: "Colonel",
+        BG: "Brigadier General",
+        MG: "Major General",
+        LTG: "Lieutenant General",
+        GEN: "General"
+    };
+
+    const shortRank = String(staff.rank || "").trim().toUpperCase();
+
+    return rankMap[shortRank] || staff.rank || "-";
 }
 
 function parseSheetDate(value) {
@@ -319,42 +412,4 @@ function formatPeriod(date) {
     const year = String(date.getFullYear()).slice(-2);
 
     return `${month}${year}`;
-}
-
-function getDisplayRank(staff) {
-    if (staff.fullRank && String(staff.fullRank).trim() !== "") {
-        return staff.fullRank;
-    }
-
-    const rankMap = {
-        "PVT": "Private",
-        "PV2": "Private Second Class",
-        "PFC": "Private First Class",
-        "SPC": "Specialist",
-        "CPL": "Corporal",
-        "SGT": "Sergeant",
-        "SSG": "Staff Sergeant",
-        "SFC": "Sergeant First Class",
-        "MSG": "Master Sergeant",
-        "1SG": "First Sergeant",
-        "SGM": "Sergeant Major",
-        "CSM": "Command Sergeant Major",
-        "WO1": "Warrant Officer 1",
-        "CW2": "Chief Warrant Officer 2",
-        "CW3": "Chief Warrant Officer 3",
-        "CW4": "Chief Warrant Officer 4",
-        "CW5": "Chief Warrant Officer 5",
-        "2LT": "Second Lieutenant",
-        "1LT": "First Lieutenant",
-        "CPT": "Captain",
-        "MAJ": "Major",
-        "LTC": "Lieutenant Colonel",
-        "COL": "Colonel",
-        "BG": "Brigadier General",
-        "MG": "Major General",
-        "LTG": "Lieutenant General",
-        "GEN": "General"
-    };
-
-    return rankMap[String(staff.rank || "").trim().toUpperCase()] || staff.rank || "-";
 }
