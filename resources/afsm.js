@@ -217,6 +217,8 @@ function renderBbcodeOutput() {
 
     lines.push("");
     lines.push("Awarded for being assigned to a non-combat department and serving with distinction for a period of 12 consecutive months.[/CENTER]");
+    lines.push("");
+    lines.push("[B]Congratulations![/B][/CENTER]");
 
     afsmBbcodeOutput.value = lines.join("\n");
 }
@@ -228,10 +230,10 @@ function buildTrooperBbcodeLine(staff) {
         `for S3 Dept. ${formatPeriod(staff.periodStart)} to ${formatPeriod(staff.periodEnd)}`;
 
     if (staff.milpacLink) {
-        return `[URL='${staff.milpacLink}']${displayName}[/URL] ${periodText}`;
+        return `[URL='${staff.milpacLink}']${displayName}[/URL]\n${periodText}\n`;
     }
 
-    return `${displayName} ${periodText}`;
+    return `${displayName}\n${periodText}\n`;
 }
 
 async function copyAfsmBbcode() {
