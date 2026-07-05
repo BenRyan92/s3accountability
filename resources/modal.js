@@ -10,6 +10,7 @@ const reportMonth = document.querySelector("#reportMonth");
 const reportYear = document.querySelector("#reportYear");
 const reportStatus = document.querySelector("#reportStatus");
 const reportNotes = document.querySelector("#reportNotes");
+const reportPassword = document.querySelector("#reportPassword");
 
 const submitButton = document.querySelector("#submitReportButton");
 const submitStatus = document.querySelector("#submitStatus");
@@ -62,6 +63,11 @@ async function handleReportSubmit(event) {
         return;
     }
 
+    if (!reportMonth.value || !reportYear.value || !reportStatus.value || !reportPassword.value) {
+        alert("Please complete all required fields, including the staff password.");
+        return;
+    }
+
     setSubmitLoading(true);
 
     const reportData = {
@@ -69,7 +75,8 @@ async function handleReportSubmit(event) {
         reportMonth: Number(reportMonth.value),
         reportYear: Number(reportYear.value),
         status: reportStatus.value,
-        notes: reportNotes.value.trim()
+        notes: reportNotes.value.trim(),
+        password: reportPassword.value
     };
 
     try {
@@ -120,6 +127,9 @@ function openReportModal(preselectedName = null) {
     reportYear.value = reportingPeriod.year;
     reportStatus.value = "";
     reportNotes.value = "";
+    if (reportPassword) {
+        reportPassword.value = "";
+    }
 
     editingExistingReport = false;
 

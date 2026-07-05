@@ -134,13 +134,28 @@ function calculateAfsmEligibility() {
 }
 
 function getAfsmBaseDate(staff) {
-    const lastAfsm = parseSheetDate(staff["Last AFSM"]);
+    const joinDate = parseSheetDate(staff["Join Date"]);
 
-    if (lastAfsm) {
+    const lastAfsm =
+        parseSheetDate(staff["Last AFSM"]) ||
+        parseSheetDate(staff["Date of Last AFSM"]) ||
+        parseSheetDate(staff["Last AFSM Date"]);
+
+    if (!joinDate && !lastAfsm) {
+        return null;
+    }
+
+    if (joinDate && !lastAfsm) {
+        return joinDate;
+    }
+
+    if (!joinDate && lastAfsm) {
         return lastAfsm;
     }
 
-    return parseSheetDate(staff["Join Date"]);
+    return joinDate > lastAfsm
+        ? joinDate
+        : lastAfsm;
 }
 
 function findMilpacRecord(name) {
